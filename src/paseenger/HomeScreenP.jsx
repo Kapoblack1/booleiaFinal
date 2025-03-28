@@ -421,8 +421,6 @@ export default function HomeScreenP({ route }) {
               
               )}
             </MapView>
-
-            {/* Botão para recentralizar no usuário */}
             <TouchableOpacity style={styles.button} onPress={centerMapOnUser}>
               <MaterialIcons name="my-location" size={24} color="white" />
             </TouchableOpacity>
@@ -430,13 +428,13 @@ export default function HomeScreenP({ route }) {
         )}
       </View>
 
-      {/* BottomSheet no topo da renderização */}
+
       <BottomSheet ref={bottomSheetRef} index={2} snapPoints={snapPoints}>
       <BottomSheetView
               contentContainerStyle={styles.contentContainer}
             >
               <View style={styles.searchWrapper}>
-                {/* Input de destino */}
+          
                 {showDestinationInput && (
                   <View style={styles.search}>
                     <GooglePlacesAutocomplete
@@ -483,7 +481,7 @@ export default function HomeScreenP({ route }) {
                   </View>
                 )}
 
-                {/* Botão de procurar */}
+
                 {!isKeyboardVisible && (
                   <TouchableOpacity
                     style={styles.olaButton}

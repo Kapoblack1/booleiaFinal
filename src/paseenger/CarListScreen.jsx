@@ -119,7 +119,6 @@ const CarListScreen = ({ route, navigation }) => {
         const filteredTrips = trips.filter(trip => trip.status === 'searching' && trip.similarity >= 30||trip.status ==='scheduled' && trip.similarity >= 30 &&
           trip.running);
 
-  
         setCarsData(filteredTrips);
       } catch (error) {
         console.error("Error fetching carpool data: ", error);

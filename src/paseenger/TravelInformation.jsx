@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 
 import firebase from "firebase/compat/app";
@@ -32,25 +32,29 @@ const TravelInformation = ({ route, navigation }) => {
             const tripData = doc.data();
             const onCar = tripData.onCar || [];
             const rejectedPassengers = tripData.rejectedPassengers || [];
-    
+
             const isAccepted = onCar.includes(userId);
             const isRejected = rejectedPassengers.includes(userId);
-    
+
             if (isAccepted && previousStatus !== "accepted") {
               setPreviousStatus("accepted");
               if (selectedPayment) {
                 try {
-                  await firebase.firestore().collection("trips").doc(tripId).update({
-                    onCar: firebase.firestore.FieldValue.arrayUnion({
-                      userId: userId,
-                      destination: {
-                        latitude: destination.latitude,
-                        longitude: destination.longitude,
-                        destinationName: car.destinationName
-                      },
-                      paymentMethod: selectedPayment,
-                    })
-                  });
+                  await firebase
+                    .firestore()
+                    .collection("trips")
+                    .doc(tripId)
+                    .update({
+                      onCar: firebase.firestore.FieldValue.arrayUnion({
+                        userId: userId,
+                        destination: {
+                          latitude: destination.latitude,
+                          longitude: destination.longitude,
+                          destinationName: car.destinationName,
+                        },
+                        paymentMethod: selectedPayment,
+                      }),
+                    });
 
                   setIsLoading(false);
                   navigation.navigate("Travell", {
@@ -60,7 +64,7 @@ const TravelInformation = ({ route, navigation }) => {
                     destination,
                     driverInfo: car.driver,
                     selectedPayment,
-                    tripId
+                    tripId,
                   });
                 } catch (error) {
                   console.error("Erro ao atualizar a viagem:", error);
@@ -86,12 +90,16 @@ const TravelInformation = ({ route, navigation }) => {
     }
 
     try {
-      await firebase.firestore().collection("trips").doc(car.id).update({
-        passengerLocation: {
-          latitude: origin.latitude,
-          longitude: origin.longitude,
-        }
-      });
+      await firebase
+        .firestore()
+        .collection("trips")
+        .doc(car.id)
+        .update({
+          passengerLocation: {
+            latitude: origin.latitude,
+            longitude: origin.longitude,
+          },
+        });
 
       const passengerData = {
         userId: userId,
@@ -100,15 +108,20 @@ const TravelInformation = ({ route, navigation }) => {
           latitude: origin.latitude,
           longitude: origin.longitude,
         },
-        destination: destination
+        destination: destination,
       };
 
-      await firebase.firestore().collection("trips").doc(tripId).update({
-        running: true,
-        status: "scheduled",
-        passengers: firebase.firestore.FieldValue.arrayUnion(userId),
-        passengersData: firebase.firestore.FieldValue.arrayUnion(passengerData),
-      });
+      await firebase
+        .firestore()
+        .collection("trips")
+        .doc(tripId)
+        .update({
+          running: true,
+          status: "scheduled",
+          passengers: firebase.firestore.FieldValue.arrayUnion(userId),
+          passengersData:
+            firebase.firestore.FieldValue.arrayUnion(passengerData),
+        });
 
       alert("Viagem confirmada!");
       setIsLoading(true);
@@ -125,27 +138,31 @@ const TravelInformation = ({ route, navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
-         <MaterialIcons name="arrow-back" size={24} color="#000" /> 
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.back}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#000" />
           <Text style={styles.backButton}>Rota</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.container1}>
         {isLoading ? (
           <View style={styles.spinnerContainer}>
-          <ActivityIndicator size="large" color="#188AEC" />
-          <Text>Aguardando o motorista...</Text> <TouchableOpacity
-  style={styles.cancelLoadingButton}
-  onPress={handleCancelLoading}
->
-  <Text style={styles.buttonText}>Cancelar</Text> 
-</TouchableOpacity>
-      </View>
+            <ActivityIndicator size="large" color="#188AEC" />
+            <Text>Aguardando o motorista...</Text>{" "}
+            <TouchableOpacity
+              style={styles.cancelLoadingButton}
+              onPress={handleCancelLoading}
+            >
+              <Text style={styles.buttonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <ScrollView style={styles.container}>
             <View style={styles.root}>
               <View style={styles.pins}>
-                <MaterialIcons name="location-pin" size={24} color="#000" /> 
+                <MaterialIcons name="location-pin" size={24} color="#000" />
               </View>
               <View style={styles.marks}>
                 <Text style={styles.mark}>Localização Atual</Text>
@@ -157,11 +174,17 @@ const TravelInformation = ({ route, navigation }) => {
             <View style={styles.carContainer}>
               <View style={styles.information}>
                 <View>
-                  <Text style={styles.carName}>{car.carName} {car.model}</Text>
-                  <Text style={styles.carPlate}>Matricula: {car.licensePlate}</Text>
+                  <Text style={styles.carName}>
+                    {car.carName} {car.model}
+                  </Text>
+                  <Text style={styles.carPlate}>
+                    Matricula: {car.licensePlate}
+                  </Text>
                   <View style={styles.center}>
-                    <MaterialIcons name="star" size={16} color="#FFD700" /> 
-                    <Text style={styles.carDetails}>{car.star} ({car.review} reviews)</Text>
+                    <MaterialIcons name="star" size={16} color="#FFD700" />
+                    <Text style={styles.carDetails}>
+                      {car.star} ({car.review})
+                    </Text>
                   </View>
                 </View>
                 <Image source={{ uri: car.carImage }} style={styles.carImage} />
@@ -177,27 +200,39 @@ const TravelInformation = ({ route, navigation }) => {
             </View>
             {car.driver && (
               <View style={styles.driver}>
-                <Image source={{ uri: car.driver.profilePicture }} style={styles.driverImage} />
+                <Image
+                  source={{ uri: car.driver.profilePicture }}
+                  style={styles.driverImage}
+                />
                 <Text style={styles.driverName}>{car.driver.name}</Text>
               </View>
             )}
             <View>
               <Text style={styles.select}>Selecione o método de pagamento</Text>
               <TouchableOpacity
-                style={[styles.paymentOption, selectedPayment === "cash" ? styles.selectedPayment : null]}
+                style={[
+                  styles.paymentOption,
+                  selectedPayment === "cash" ? styles.selectedPayment : null,
+                ]}
                 onPress={() => setSelectedPayment("cash")}
               >
-                <MaterialIcons name="attach-money" size={44} color="#007AFF" /> 
+                <MaterialIcons name="attach-money" size={44} color="#007AFF" />
                 <Text style={styles.money}>Dinheiro</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.paymentOption, selectedPayment === "express" ? styles.selectedPayment : null]}
+                style={[
+                  styles.paymentOption,
+                  selectedPayment === "express" ? styles.selectedPayment : null,
+                ]}
                 onPress={() => setSelectedPayment("express")}
               >
-                <MaterialIcons name="credit-card" size={44} color="#007AFF" /> 
+                <MaterialIcons name="credit-card" size={44} color="#007AFF" />
                 <Text style={styles.money}>Express</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={handleConfirm}
+              >
                 <Text style={styles.confirmButtonText}>Confirmar</Text>
               </TouchableOpacity>
             </View>
@@ -207,7 +242,6 @@ const TravelInformation = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
-
 
 const isIphone = Platform.OS === "ios";
 const styles = StyleSheet.create({
@@ -313,10 +347,10 @@ const styles = StyleSheet.create({
     color: "#B8B8B8",
     marginLeft: "3%",
   },
-  carPlate:{
+  carPlate: {
     color: "#B8B8B8",
     marginLeft: "3%",
-    top: 5
+    top: 5,
   },
   driver: {
     flexDirection: "row",
@@ -377,7 +411,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
     justifyContent: "center",
-    bottom: 63
+    bottom: 63,
   },
   cancelButtonWrapper: {
     alignItems: "center",
@@ -392,4 +426,3 @@ const styles = StyleSheet.create({
 });
 
 export default TravelInformation;
-

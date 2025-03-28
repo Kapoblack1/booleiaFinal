@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Platform } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import config from "../../confiApi";
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   header: {
     position: "absolute",
-    top: 20,
+    top: Platform.OS === 'ios' ? 70 : 20,
     left: 0,
     right: 0,
     width: "100%",

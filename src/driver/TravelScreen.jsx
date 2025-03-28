@@ -18,12 +18,13 @@ import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { getDatabase, ref, onValue } from "firebase/database";
 
 export default function HomeScreenP({ route, navigation }) {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
+  const previousArrivedRef = useRef([]);
   const bottomSheetRef = useRef(null);
   const { tripId } = route.params;
   const snapPoints = ["30%", "40%", "90%"];
@@ -210,30 +211,38 @@ export default function HomeScreenP({ route, navigation }) {
   }, [driverLocation, onCarPassengers]);
 
   // Atualiza a lista de passageiros no carro
-  useEffect(() => {
-    if (tripId) {
-      const unsubscribe = firebase
-        .firestore()
-        .collection("trips")
-        .doc(tripId)
-        .onSnapshot((doc) => {
-          if (doc.exists) {
-            const tripData = doc.data();
-            if (tripData.onCar) {
-              // Certifique-se de que `onCar` é um array e que você está atualizando a lista corretamente
-              setOnCarPassengers(
-                tripData.onCar.map((item) => ({
-                  userId: item.userId,
-                  destination: item.destination,
-                }))
-              );
-            }
-          }
-        });
+useEffect(() => {
+  const db = getFirestore();
 
-      return () => unsubscribe();
-    }
+    const tripRef = doc(db, "trips", tripId);
+
+    const unsubscribe = onSnapshot(tripRef, async (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const arrivedArray = docSnapshot.data().arrived || [];
+
+        // Filtra apenas os novos IDs adicionados
+        const newUserIds = arrivedArray.filter(id => !previousArrivedRef.current.includes(id));
+
+        // Atualiza a referência com a nova versão do array
+        previousArrivedRef.current = arrivedArray;
+
+        // Busca o nome do usuário para cada novo ID
+        for (const newUserId of newUserIds) {
+          const userRef = doc(db, "users", newUserId);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            const userName = userSnap.data().name;
+            Alert.alert("Rota concluida", ` ${userName} chegou ao seu destino.`);
+          } 
+        }
+      }
+    });
+
+    // Cleanup para remover o listener quando o componente for desmontado
+    return () => unsubscribe();
   }, [tripId]);
+
 
   useEffect(() => {
     if (tripId) {
@@ -433,7 +442,7 @@ export default function HomeScreenP({ route, navigation }) {
                         latitude: passenger.destination.latitude,
                         longitude: passenger.destination.longitude,
                       }}
-                      pinColor="green" // Cor do marcador para o destino
+                      pinColor="green"
                       title={`Destino do Passageiro: ${passenger.userId}`}
                     />
                   )
@@ -451,7 +460,6 @@ export default function HomeScreenP({ route, navigation }) {
               )}
             </MapView>
 
-            {/* Botão para recentralizar no usuário */}
             <TouchableOpacity style={styles.button} onPress={centerMapOnUser}>
               <MaterialIcons name="my-location" size={24} color="white" />
             </TouchableOpacity>
@@ -459,7 +467,6 @@ export default function HomeScreenP({ route, navigation }) {
         )}
       </View>
 
-      {/* BottomSheet no topo da renderização */}
       <BottomSheet ref={bottomSheetRef} index={2} snapPoints={snapPoints}>
       <BottomSheetView style={styles.bottomSheetContent}>
             <TouchableOpacity

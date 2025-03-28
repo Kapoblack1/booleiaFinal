@@ -505,7 +505,7 @@ export default function HomeScreenP({ route }) {
                 ))}
               </MapView>
 
-            {/* Botão para recentralizar no usuário */}
+ 
             <TouchableOpacity style={styles.button} onPress={centerMapOnUser}>
               <MaterialIcons name="my-location" size={24} color="white" />
             </TouchableOpacity>
@@ -513,7 +513,6 @@ export default function HomeScreenP({ route }) {
         )}
       </View>
 
-      {/* BottomSheet no topo da renderização */}
       <BottomSheet
             ref={bottomSheetRef}
             index={1}
@@ -710,7 +709,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#007AFF",
-    paddingVertical: 10,
+    paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
@@ -724,6 +723,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 120,
     borderRadius: 5,
+    width: 360,
     top: -20,
 
     alignSelf: "center",

@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { FirebaseRecaptchaVerifierModal } from "expo-firebase-recaptcha";
+
 import { useNavigation } from "@react-navigation/native";
 import { firebaseConfig } from "../../config";
 import forbidden from "../../assets/forbidden.webp";
@@ -49,10 +49,7 @@ function OTPScreen({ route }) {
 
   return (
     <View style={styles.container}>
-      <FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifier}
-        firebaseConfig={firebaseConfig}
-      />
+      
       <View style={styles.container2}>
         <View style={{ paddingTop: "10%", justifyContent: "center" }}>
           <Image source={forbidden} />

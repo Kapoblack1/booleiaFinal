@@ -55,7 +55,7 @@ export default function HomeScreenP({ route }) {
   const [mapRegion, setMapRegion] = useState(null);
   const [distance, setDistance] = useState(null);
   const [price, setPrice] = useState(null);
-  const [modalVisible, setModalVisible] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   const [driverLocation, setDriverLocation] = useState(null);
   const [selectedRating, setSelectedRating] = useState(0);
   const [driverId, setDriverId] = useState(null);
@@ -82,7 +82,7 @@ export default function HomeScreenP({ route }) {
     })();
   }, []);
 
-  useEffect(() => {
+ /* useEffect(() => {
     // Set a timeout to mark the user as 'arrived' after 5 seconds
     const timer = setTimeout(async () => {
       try {
@@ -107,7 +107,7 @@ export default function HomeScreenP({ route }) {
     // Cleanup the timeout if the component unmounts or dependencies change
     return () => clearTimeout(timer);
   }, [tripId, userId]); // Trigger the effect when tripId or userId change
-
+*/
   useEffect(() => {
     const fetchDriverId = async () => {
       const db = getFirestore();
@@ -180,12 +180,30 @@ export default function HomeScreenP({ route }) {
         destination.latitude,
         destination.longitude
       );
-
-      if (distanceToDestination < 30) {
-        // Defina a distância em metros
-        setHasArrived(true);
-        setModalVisible(true);
-        Alert.alert("Aviso", "Você chegou ao seu destino!");
+  
+      if (distanceToDestination < 22740) {
+        const timer = setTimeout(async () => {
+          try {
+            const db = getFirestore();
+            const tripRef = doc(db, "trips", tripId);
+  
+            await updateDoc(tripRef, {
+              arrived: arrayUnion(userId),
+            });
+  
+           /* Alert.alert(`Passenger with userId ${userId} marked as arrived.`);*/
+            setHasArrived(true); // Marcar como chegou
+            setModalVisible(true)
+          } catch (error) {
+            console.error("Error updating arrived status: ", error);
+            Alert.alert(
+              "Erro",
+              "Houve um problema ao atualizar o status de chegada."
+            );
+          }
+        }, 0);
+  
+        return () => clearTimeout(timer);
       }
     }
   }, [driverLocation, destination, hasArrived]);
